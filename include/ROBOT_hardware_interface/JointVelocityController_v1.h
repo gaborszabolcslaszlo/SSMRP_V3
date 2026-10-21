@@ -35,7 +35,6 @@
 
 #pragma once
 
-
 /**
    @class effort_controllers::JointVelocityController
    @brief Joint Velocity Controller
@@ -64,10 +63,10 @@
 namespace effort_controllers
 {
 
-    class JointVelocityControllerv1: public effort_controllers::JointVelocityController
+    class JointVelocityControllerv1 : public effort_controllers::JointVelocityController
     {
-        public:
-        private:    
+    public:
+    private:
     };
 
 } // namespace

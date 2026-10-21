@@ -3,8 +3,7 @@
     <rosparam file="$(find robot)/config/controllers.yaml" command="load"/>
     <rosparam file="$(find robot)/config/joint_limits.yaml" command="load"/>
     <node name="robot" pkg="robot" type="robot_node" output="screen"/>
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/"
-        args="
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/" args="
             /ROBOT/controller/state
             /ROBOT/controller/position/YOUR_ROBOT_JOINT
             /ROBOT/controller/position/YOUR_OTHER_ROBOT_JOINT

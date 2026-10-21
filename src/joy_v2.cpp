@@ -9,12 +9,16 @@
 #include <geometry_msgs/Vector3.h>
 #include <dynamic_reconfigure/server.h>
 #include <control_msgs/JointControllerState.h>
+#include <chrono>
+#include <atomic>
 
 #define sign(a) ((a) < 0 ? -1 : 1)
-#define cntOfButons  10
+#define cntOfButons 10
 
 using namespace std;
+using namespace std::chrono;
 
+std::atomic<int64_t> lastMsgFromJoy{0};
 
 int button_DeadMan_1_Value;
 int button_DeadMan_2_Value;
@@ -24,7 +28,6 @@ float aix1_Value = 0;
 
 float lefterror;
 float righterror;
-
 
 float maxVx = 0.0;
 float maxDelta = 0.0;
@@ -46,15 +49,16 @@ std_msgs::Float64 leftcmd_msg;
 std_msgs::Float64 rightcmd_msg;
 robot::RobotJoyConfig configJoy;
 
-
 std::function<void(bool)> functionPointers[cntOfButons];
 int buttonsCopy[cntOfButons];
 
-void deadManA(int actValue) {
+void deadManA(int actValue)
+{
     button_DeadMan_1_Value = actValue;
 }
 
-void deadManB(int actValue) {
+void deadManB(int actValue)
+{
     button_DeadMan_2_Value = actValue;
 }
 
@@ -63,14 +67,14 @@ void controlMode(int actValue)
     int ControlMode = (actValue == 1) ? 0 : 1;
 }
 
-float changeValue(float actual,float inc, float config)
+float changeValue(float actual, float inc, float config)
 {
     float temp = 0.0;
     float out = actual;
-    if(config > 0)
+    if (config > 0)
     {
         temp = actual + inc;
-        if(temp > 0 && temp <= config)
+        if (temp > 0 && temp <= config)
         {
             out = temp;
         }
@@ -78,7 +82,7 @@ float changeValue(float actual,float inc, float config)
     else
     {
         temp = actual - inc;
-        if(temp < 0 && temp >= config)
+        if (temp < 0 && temp >= config)
         {
             out = temp;
         }
@@ -88,32 +92,36 @@ float changeValue(float actual,float inc, float config)
 
 void vxUp(int actValue)
 {
-    if(actValue == 1){
-        maxVx = changeValue(maxVx,1,configJoy.maxOutputValue);
+    if (actValue == 1)
+    {
+        maxVx = changeValue(maxVx, 1, configJoy.maxOutputValue);
         ROS_INFO("Max vx speed changed to: %f", maxVx);
     }
 }
 
 void vxDown(int actValue)
 {
-    if(actValue == 1){
-        maxVx = changeValue(maxVx,-1,configJoy.maxOutputValue);
+    if (actValue == 1)
+    {
+        maxVx = changeValue(maxVx, -1, configJoy.maxOutputValue);
         ROS_INFO("Max vx speed changed to: %f", maxVx);
     }
 }
 
 void deltaUp(int actValue)
 {
-    if(actValue == 1){
-        maxDelta = changeValue(maxDelta,0.1,configJoy.angularZ_scale);
+    if (actValue == 1)
+    {
+        maxDelta = changeValue(maxDelta, 0.1, configJoy.angularZ_scale);
         ROS_INFO("Max dela speed changed to: %f", maxDelta);
     }
 }
 
 void deltaDown(int actValue)
-{   
-    if(actValue == 1){
-        maxDelta = changeValue(maxDelta,-0.1,configJoy.angularZ_scale);
+{
+    if (actValue == 1)
+    {
+        maxDelta = changeValue(maxDelta, -0.1, configJoy.angularZ_scale);
         ROS_INFO("Max dela speed changed to: %f", maxDelta);
     }
 }
@@ -121,37 +129,38 @@ void deltaDown(int actValue)
 void updateButtonCallBackFunctions()
 {
     ROS_INFO("Updating button handler functons.");
-    functionPointers[configJoy.controlMode_button-1] = {controlMode};
-    functionPointers[configJoy.deadManA_button-1] = {deadManA};
-    functionPointers[configJoy.deadManB_button-1] = {deadManB};
-    
-    functionPointers[configJoy.VdeltaUp_button-1] = {deltaUp};
-    functionPointers[configJoy.VdeltaDown_button-1] = {deltaDown};
-    
-    functionPointers[configJoy.VxUp_button-1] = {vxUp};
-    functionPointers[configJoy.VxDown_button-1] = {vxDown};
+    functionPointers[configJoy.controlMode_button - 1] = {controlMode};
+    functionPointers[configJoy.deadManA_button - 1] = {deadManA};
+    functionPointers[configJoy.deadManB_button - 1] = {deadManB};
+
+    functionPointers[configJoy.VdeltaUp_button - 1] = {deltaUp};
+    functionPointers[configJoy.VdeltaDown_button - 1] = {deltaDown};
+
+    functionPointers[configJoy.VxUp_button - 1] = {vxUp};
+    functionPointers[configJoy.VxDown_button - 1] = {vxDown};
 }
 
-void DynamicReconfigureCallBack(robot::RobotJoyConfig &config,uint32_t level) {
+void DynamicReconfigureCallBack(robot::RobotJoyConfig &config, uint32_t level)
+{
     ROS_INFO("DynamicReconfigureCallBack");
-	configJoy = config;
+    configJoy = config;
     updateButtonCallBackFunctions();
     maxVx = configJoy.maxOutputValue;
     maxDelta = configJoy.angularZ_scale;
-    
 }
 
-void LeftErrorCallback(const control_msgs::JointControllerState& msg)
+void LeftErrorCallback(const control_msgs::JointControllerState &msg)
 {
     lefterror = msg.set_point;
 }
 
-void RightErrorCallback(const control_msgs::JointControllerState& msg)
+void RightErrorCallback(const control_msgs::JointControllerState &msg)
 {
     righterror = msg.set_point;
 }
 
-std::pair<double, double> calcSpeed(double vx, double vz) {
+std::pair<double, double> calcSpeed(double vx, double vz)
+{
     // Számoljuk ki a és b értékeket
     double a = vx + vz;
     double b = vx - vz;
@@ -161,7 +170,8 @@ std::pair<double, double> calcSpeed(double vx, double vz) {
     double absB = std::abs(b);
 
     // Ellenőrizzük, hogy a vagy b nagyobb-e mint 1
-    if (absA > 1.0 || absB > 1.0) {
+    if (absA > 1.0 || absB > 1.0)
+    {
         // Számoljuk ki a skálázási faktort
         double scale = 1.0 / std::max(absA, absB);
 
@@ -174,16 +184,20 @@ std::pair<double, double> calcSpeed(double vx, double vz) {
     return std::make_pair(a, b);
 }
 
-void joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
+void joyCallback(const sensor_msgs::Joy::ConstPtr &joy)
 {
     ROS_INFO("BeginjoyCallback.");
     float r = joy->axes[1];
-
+    auto now = steady_clock::now().time_since_epoch();
+    auto ms = duration_cast<milliseconds>(now).count();
+    lastMsgFromJoy.store(ms, std::memory_order_relaxed);
     ROS_INFO("Checking the buttons value.");
-    for (int i = 0; i < cntOfButons; ++i) {
-        if (joy->buttons[i] != buttonsCopy[i]) {
+    for (int i = 0; i < cntOfButons; ++i)
+    {
+        if (joy->buttons[i] != buttonsCopy[i])
+        {
             // Azonos indexű elemek különböznek, hívjuk meg a függvényt
-            if(functionPointers[i] !=nullptr)
+            if (functionPointers[i] != nullptr)
             {
                 ROS_INFO("Button comparison was changed for button no:%d.", i);
                 functionPointers[i](joy->buttons[i]);
@@ -194,7 +208,7 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
             }
         }
     }
-    
+
     ROS_INFO("Get axis value.");
     aix0_Value = joy->axes[configJoy.vz_Axis];
     aix1_Value = joy->axes[configJoy.vx_Axis];
@@ -205,8 +219,7 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
     float vx = aix1_Value;
     float vz = aix0_Value * maxDelta;
 
-    
-    std::pair<double, double>speeds = calcSpeed(vx,vz);
+    std::pair<double, double> speeds = calcSpeed(vx, vz);
     rightcmd_msg.data = (speeds.first == 0.0) ? 0.0 : -speeds.first * maxVx;
     leftcmd_msg.data = (speeds.second == 0.0) ? 0.0 : speeds.second * maxVx;
     ROS_INFO("Joy cmd, right=%d, left=%d", rightcmd_msg.data, leftcmd_msg.data);
@@ -214,22 +227,28 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
     joyControll_msg.linear = V3_linear;
     joyControll_msg.angular = V3_angular;
 
-    std::copy(std::begin(joy->buttons),std::end(joy->buttons),std::begin(buttonsCopy));
+    std::copy(std::begin(joy->buttons), std::end(joy->buttons), std::begin(buttonsCopy));
     ROS_INFO("End joyCallback.");
 }
 
-void* DeadMan(void* thisPtr)
+void *DeadMan(void *thisPtr)
 {
     ROS_INFO("Begin DeadMan.");
     while (true)
     {
         try
         {
-            emsMsg.header.stamp = ros::Time::now();
-            emsMsg.systemIsOk = (button_DeadMan_1_Value && button_DeadMan_2_Value) ? 1 : 0;
-            ems_pub.publish(emsMsg);            
+            auto now = steady_clock::now().time_since_epoch();
+            auto nowMs = duration_cast<milliseconds>(now).count();
+            auto last = lastMsgFromJoy.load(std::memory_order_relaxed);
+            if (last != 0 && nowMs - last < 1500)
+            {
+                emsMsg.header.stamp = ros::Time::now();
+                emsMsg.systemIsOk = (button_DeadMan_1_Value && button_DeadMan_2_Value) ? 1 : 0;
+                ems_pub.publish(emsMsg);
+            }
         }
-        catch (std::exception& ex)
+        catch (std::exception &ex)
         {
             ROS_ERROR("Exception on thread: %s", ex.what());
         }
@@ -239,7 +258,7 @@ void* DeadMan(void* thisPtr)
     ROS_INFO("End DeadMan.");
 }
 
-void* JoyCommand(void* thisPtr)
+void *JoyCommand(void *thisPtr)
 {
     ROS_INFO("Begin JoyCommand.");
     while (true)
@@ -253,7 +272,7 @@ void* JoyCommand(void* thisPtr)
                 rightCmd_pub.publish(rightcmd_msg);
             }
         }
-        catch (std::exception& ex)
+        catch (std::exception &ex)
         {
             ROS_ERROR("Exception on %s", ex.what());
         }
@@ -263,7 +282,7 @@ void* JoyCommand(void* thisPtr)
     ROS_INFO("End JoyCommand.");
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     ROS_INFO("Start joy");
 
@@ -274,7 +293,7 @@ int main(int argc, char** argv)
     dynamic_reconfigure::Server<robot::RobotJoyConfig> DinReconfig;
     dynamic_reconfigure::Server<robot::RobotJoyConfig>::CallbackType f;
     f = boost::bind(&DynamicReconfigureCallBack, _1, _2);
-    DinReconfig.setCallback(f);    
+    DinReconfig.setCallback(f);
 
     ROS_INFO("Init subscribers.");
     ros::Subscriber joy_sub;
@@ -283,7 +302,7 @@ int main(int argc, char** argv)
     sleep(1);
     joy_sub = nh.subscribe("joy", 10, &joyCallback);
     leftError_sub = nh.subscribe("/GYOM/controller/velocity/LeftWCont/state", 100, &LeftErrorCallback);
-    rightError_sub = nh.subscribe("/GYOM/controller/velocity/LeftWCont/state", 100, &RightErrorCallback);
+    rightError_sub = nh.subscribe("/GYOM/controller/velocity/RightCont/state", 100, &RightErrorCallback);
 
     ROS_INFO("Init publishers.");
     ems_pub = nh.advertise<robot::GlobalEnable>("DeadMan", 10);

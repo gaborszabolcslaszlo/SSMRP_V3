@@ -9,36 +9,35 @@ namespace FastFilters
 
     typedef struct CircularElement
     {
-        CircularElement * NextElement;
+        CircularElement *NextElement;
         double Value;
-    }CircularElement;
+    } CircularElement;
 
     typedef struct CircularBuffer
     {
-        CircularElement* LastElement;
+        CircularElement *LastElement;
         double Sum;
         int Count;
         double Avg;
     };
-    
- 
+
     class CircularBufferClass
     {
-        public:
-            CircularBufferClass(int cnt);
-            void AddElement(double value);
-            double GetAvg();
-        private:
-            CircularBuffer buffer;
-            
-    };
-    class AVGFilter: public CircularBufferClass
-    {
-        public:
-            AVGFilter(int cnt);
-    };
-    
-}
+    public:
+        CircularBufferClass(int cnt);
+        void AddElement(double value);
+        double GetAvg();
 
+    private:
+        CircularBuffer buffer;
+    };
+
+    class AVGFilter : public CircularBufferClass
+    {
+    public:
+        AVGFilter(int cnt);
+    };
+
+}
 
 #endif /* CIRCULARBUFFER_H_ */

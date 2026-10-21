@@ -11,6 +11,6 @@
 
     <param name="device" type="string" value="/dev/video0" />
 
-  </node> 
-  
+  </node>
+
 </launch>

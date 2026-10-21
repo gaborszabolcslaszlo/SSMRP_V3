@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 
 <launch>
-<param name="joy_node/dev" type="str" value="/dev/input/js0" />
-<arg name="nsName" default="GYOM"/> 
+   <param name="joy_node/dev" type="str" value="/dev/input/js0" />
+   <arg name="nsName" default="GYOM"/>
 
-   <group ns = "/$(arg nsName)">  
-   <node name="Joy" pkg="joy" type="joy_node"> 
-  	<param name="autorepeat_rate" value="0.5" />
-   </node>
+   <group ns = "/$(arg nsName)">
+      <node name="Joy" pkg="joy" type="joy_node">
+         <param name="autorepeat_rate" value="0.5" />
+      </node>
    </group>
-   
-  
+
+
 </launch>

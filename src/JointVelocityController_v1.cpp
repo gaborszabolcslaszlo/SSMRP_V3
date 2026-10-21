@@ -36,45 +36,44 @@
 #include <effort_controllers/JointVelocityControllerv1.h>
 #include <pluginlib/class_list_macros.hpp>
 
-
-namespace effort_controllers {
-
-void JointVelocityController1::update(const ros::Time& time, const ros::Duration& period)
+namespace effort_controllers
 {
-  double error = command_ - joint_.getVelocity();
 
-  // Set the PID error and compute the PID command with nonuniform time
-  // step size. The derivative error is computed from the change in the error
-  // and the timestep dt.
-  double commanded_effort = pid_controller_.computeCommand(error, period);
-
-  joint_.setCommand(commanded_effort);
-
-  if(loop_count_ % 1 == 0)
+  void JointVelocityController1::update(const ros::Time &time, const ros::Duration &period)
   {
-    if(controller_state_publisher_ && controller_state_publisher_->trylock())
+    double error = command_ - joint_.getVelocity();
+
+    // Set the PID error and compute the PID command with nonuniform time
+    // step size. The derivative error is computed from the change in the error
+    // and the timestep dt.
+    double commanded_effort = pid_controller_.computeCommand(error, period);
+
+    joint_.setCommand(commanded_effort);
+
+    if (loop_count_ % 1 == 0)
     {
-      controller_state_publisher_->msg_.header.stamp = time;
-      controller_state_publisher_->msg_.set_point = command_;
-      controller_state_publisher_->msg_.process_value = joint_.getVelocity();
-      controller_state_publisher_->msg_.error = error;
-      controller_state_publisher_->msg_.time_step = period.toSec();
-      controller_state_publisher_->msg_.command = commanded_effort;
+      if (controller_state_publisher_ && controller_state_publisher_->trylock())
+      {
+        controller_state_publisher_->msg_.header.stamp = time;
+        controller_state_publisher_->msg_.set_point = command_;
+        controller_state_publisher_->msg_.process_value = joint_.getVelocity();
+        controller_state_publisher_->msg_.error = error;
+        controller_state_publisher_->msg_.time_step = period.toSec();
+        controller_state_publisher_->msg_.command = commanded_effort;
 
-      double dummy;
-      bool antiwindup;
-      getGains(controller_state_publisher_->msg_.p,
-        controller_state_publisher_->msg_.i,
-        controller_state_publisher_->msg_.d,
-        controller_state_publisher_->msg_.i_clamp,
-        dummy,
-        antiwindup);
-      controller_state_publisher_->msg_.antiwindup = static_cast<char>(antiwindup);
-      controller_state_publisher_->unlockAndPublish();
+        double dummy;
+        bool antiwindup;
+        getGains(controller_state_publisher_->msg_.p,
+                 controller_state_publisher_->msg_.i,
+                 controller_state_publisher_->msg_.d,
+                 controller_state_publisher_->msg_.i_clamp,
+                 dummy,
+                 antiwindup);
+        controller_state_publisher_->msg_.antiwindup = static_cast<char>(antiwindup);
+        controller_state_publisher_->unlockAndPublish();
+      }
     }
+    loop_count_++;
   }
-  loop_count_++;
-}
 
-
-PLUGINLIB_EXPORT_CLASS( effort_controllers::JointVelocityControllerv1, controller_interface::ControllerBase)
+  PLUGINLIB_EXPORT_CLASS(effort_controllers::JointVelocityControllerv1, controller_interface::ControllerBase)

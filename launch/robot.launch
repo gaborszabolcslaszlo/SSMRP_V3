@@ -1,52 +1,51 @@
 ﻿<?xml version="1.0"?>
 
 <launch>
-  <!-- a basic listener node -->
-    <env name="ROSCONSOLE_CONFIG_FILE"  value="$(find robot)/config/rosconsole.config"/>
+    <!-- a basic listener node -->
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find robot)/config/rosconsole.config"/>
     <env name="ROSCONSOLE_FORMAT" value="[${severity}][${walltime:%Y-%m-%d %H:%M:%S.%f}][${node}]: ${message}"/>
     <arg name="model" default="$(find robot)/urdf/modell.urdf.xml"/>
-    <arg name="nsName" default="GYOM"/> 
-    <arg name="robotName" default="valami"/> 
-  
-    <group ns = "/$(arg nsName)">  
-        <rosparam file="$(find robot)/config/joint_limits.yaml" command="load"/>
-        <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />  
-	<param name="joy_node/dev" type="str" value="/dev/input/js0" />
-		
-		<!-- Load joint controller configurations from YAML file to parameter server -->
-		<rosparam file="$(find robot)/config/controllers.yaml" command="load"/>
-		<rosparam file="$(find robot)/config/hardware.yaml" command="load"/>
-		<rosparam file="$(find robot)/config/zybo.yaml" command="load"/>
-		<rosparam file="$(find robot)/config/remotejoy.yaml" command="load"/>
+    <arg name="nsName" default="GYOM"/>
+    <arg name="robotName" default="valami"/>
 
-  <node name="Joy" pkg="joy" type="joy_node"> 
-  	<param name="autorepeat_rate" value="0.5" />
-   </node>
-   
-  <node name="remotejoy" pkg="robot" type="TeleopJoy"> 
-  	<remap from="DeadMan" to="/GYOM/GlobalEnable" />
-  	<remap from="LeftCmd" to="/GYOM/controller/velocity/LeftWCont/command" />
-  	<remap from="RightCmd" to="/GYOM/controller/velocity/RightWCont/command" />
-   </node>
-   
-   
-        
+    <group ns = "/$(arg nsName)">
+        <rosparam file="$(find robot)/config/joint_limits.yaml" command="load"/>
+        <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+        <param name="joy_node/dev" type="str" value="/dev/input/js0" />
+
+        <!-- Load joint controller configurations from YAML file to parameter server -->
+        <rosparam file="$(find robot)/config/controllers.yaml" command="load"/>
+        <rosparam file="$(find robot)/config/hardware.yaml" command="load"/>
+        <rosparam file="$(find robot)/config/zybo.yaml" command="load"/>
+        <rosparam file="$(find robot)/config/remotejoy.yaml" command="load"/>
+
+        <node name="Joy" pkg="joy" type="joy_node">
+            <param name="autorepeat_rate" value="0.5" />
+        </node>
+
+        <node name="remotejoy" pkg="robot" type="TeleopJoy">
+            <remap from="DeadMan" to="/GYOM/GlobalEnable" />
+            <remap from="LeftCmd" to="/GYOM/controller/velocity/LeftWCont/command" />
+            <remap from="RightCmd" to="/GYOM/controller/velocity/RightWCont/command" />
+        </node>
+
+
+
         <node name="valami" pkg="robot" type="robot_node" output="screen">
             <param name="loop_hz" type="int" value="100"/>
-		</node>  
-		 
+        </node>
 
-        
-        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="true" 
-            output="screen" args="controller/state controller/velocity/RightWCont controller/velocity/LeftWCont">
-		</node>
-		
-		<param name="joy_node/dev" type="str" value="/dev/input/js0" />
-		
-		 
-                    
-                
-      <!--  <node name="LeftWheelPid_Controller" pkg="pid" type="controller" output="screen" >
+
+
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="true" output="screen" args="controller/state controller/velocity/RightWCont controller/velocity/LeftWCont">
+        </node>
+
+        <param name="joy_node/dev" type="str" value="/dev/input/js0" />
+
+
+
+
+        <!--  <node name="LeftWheelPid_Controller" pkg="pid" type="controller" output="screen">
             <param name="node_name" value="left_wheel_pid" />
             <param name="Kp" value="5.0" />
             <param name="Ki" value="0.0" />
@@ -61,7 +60,7 @@
             <remap from="control_effort" to="LeftControlSig" />            
         </node>
         
-         <node name="RightWheelPid_Controller" pkg="pid" type="controller" output="screen" >
+         <node name="RightWheelPid_Controller" pkg="pid" type="controller" output="screen">
             <param name="node_name" value="left_wheel_pid" />
             <param name="Kp" value="5.0" />
             <param name="Ki" value="0.0" />
@@ -75,13 +74,13 @@
             <remap from="state" to="RightState" />            
             <remap from="control_effort" to="RightControlSig" />            
         </node>      -->
-                
-		<!-- <node name="TeleopJoy" pkg="robot" type="TeleopJoy" >
+
+        <!-- <node name="TeleopJoy" pkg="robot" type="TeleopJoy">
 			<remap from="DeadMan" to="GlobalEnable" />
 		</node> -->
 
 
-		
+
 
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
@@ -92,8 +91,8 @@
         controller/position/YOUR_ROBOT_JOINT
                     controller/position/YOUR_OTHER_ROBOT_JOINT
                     controller/position/robot_velocity_controller -->
-    
+
     </group>
-  
-  
+
+
 </launch>
