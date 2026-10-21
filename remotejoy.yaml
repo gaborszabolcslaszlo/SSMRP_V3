@@ -1,0 +1,8 @@
+remotejoy:
+    angularZ_scale: 0.2
+    controlMode_button: 1
+    deadManA_button: 5
+    deadManB_button: 7
+    maxOutputValue: -5
+    vx_Axis: 1
+    vz_Axis: 2

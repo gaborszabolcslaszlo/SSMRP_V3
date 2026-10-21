@@ -1,0 +1,7 @@
+float32 startCmd
+float32 stopCmd
+float32 stepCmd
+int32 waitMs
+string nameWheel
+---
+string status

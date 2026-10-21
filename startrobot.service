@@ -1,0 +1,9 @@
+[Unit]
+Description=Start ROS node
+
+[Service]
+ExecStart=/usr/bin/sudo /bin/bash /home/ubuntu/catkin_ws/src/robot/start.sh
+
+[Install]
+ WantedBy=multi-user.target
+

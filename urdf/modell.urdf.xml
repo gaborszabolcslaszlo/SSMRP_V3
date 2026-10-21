@@ -1,0 +1,96 @@
+<robot name="MobileRobotPlatform_4Wheel" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<material name="blue">
+    <color rgba="0 0 0.8 1"/>
+  </material>
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+  <material name="lila">
+    <color rgba="0.5 1 0.6"/>
+  </material>
+
+  <link name="FR_link" > 
+     <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="file:///home/ubuntu/catkin_ws/src/robot/urdf/URDF_stl/RobotKereK_V1.stl"/>>
+      </geometry>
+      <origin rpy="1.57 0 -3.14" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.6" radius="0.2"/>
+      </geometry>
+    </collision>
+   </link>
+
+
+  <link name="FL_link" >
+   <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="file:///home/ubuntu/catkin_ws/src/robot/urdf/urdf/URDF_stl/RobotKereK_V1.stl"/>>
+      </geometry>
+       <origin rpy="1.57 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.6" radius="0.2"/>
+      </geometry>
+    </collision>
+ </link>
+
+ <link name="BODY_link">
+    <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="file:///home/ubuntu/catkin_ws/src/robot/urdf/URDF_stl/RobotHelyetesitoTorzs.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.35 -0.25 0"/>
+      <material name="lila"/>
+    </visual>
+  </link>
+  
+  
+
+  <joint name="LEFT_W" type="continuous">
+    <parent link="BODY_link"/>
+    <child link="FL_link"/>    
+    <origin xyz="0.29 -0.33 0" rpy="0 0 0" />
+    <limit effort="30" velocity="1.0" lower="-2.2" upper="0.7" />
+    <safety_controller k_velocity="1" k_position="1" soft_lower_limit="-2.0" soft_upper_limit="0.5" />
+  </joint>
+
+  <joint name="RIGHT_W" type="continuous">
+    <parent link="BODY_link"/>
+    <child link="FR_link"/>    
+    <origin xyz="0.29 0.330 0" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <safety_controller k_velocity="1" k_position="1" soft_lower_limit="-2.0" soft_upper_limit="0.5" />
+  </joint>
+
+  <transmission name="RightFWheel">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RIGHT_W">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motorright">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <transmission name="LeftFWheel">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RIGHT_W">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motorleft">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  
+  
+</robot>

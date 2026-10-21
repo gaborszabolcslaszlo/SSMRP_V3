@@ -1,0 +1,57 @@
+ controller:
+    state:
+      type: joint_state_controller/JointStateController
+      publish_rate: 50
+    velocity:
+      LeftWCont:
+        type: effort_controllers/JointVelocityController
+        joint: LEFT_W
+        pid: {p: 0.02, i: 0.04, d: 0.0, i_clamp_min: -1.0, i_clamp_max: 1.0, antiwindup: true}
+        stateupdatediv: 1
+      RightWCont:
+        type: effort_controllers/JointVelocityController
+        joint: RIGHT_W
+        pid: {p: 0.02, i: 0.04, d: 0.0, i_clamp_min: -1.0, i_clamp_max: 1.0, antiwindup: true}
+        stateupdatediv: 1
+    robot_velocity_controller:
+        type: diff_drive_controller/DiffDriveController
+        left_wheel: LEFT_W
+        right_wheel: RIGHT_W
+        publish_rate: 5
+        pose_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+        twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]  
+        # Base frame_ids
+        base_frame_id: BODY_link
+
+        # Odometry fused with IMU is published by robot_localization, so
+        # no need to publish a TF based on encoders alone.
+        enable_odom_tf: false
+        allow_multiple_cmd_vel_publishers: true
+        publish_cmd: true
+
+        # Husky hardware provides wheel velocities
+        estimate_velocity_from_position: false
+
+        # Wheel separation and radius multipliers
+        wheel_separation_multiplier: 1.875 # default: 1.0
+        wheel_radius_multiplier    : 1.0 # default: 1.0
+
+        # Velocity and acceleration limits
+        # Whenever a min_* is unspecified, default to -max_*
+        linear:
+            x:
+                has_velocity_limits    : true
+                max_velocity           : 1.0   # m/s
+                has_acceleration_limits: true
+                max_acceleration       : 3.0   # m/s^2
+        angular:
+            z:
+                has_velocity_limits    : true
+                max_velocity           : 0.1   # rad/s
+                has_acceleration_limits: true
+                max_acceleration       : 1   # rad/s^2
+                
+                
+            
+            
+ 

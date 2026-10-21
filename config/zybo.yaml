@@ -1,0 +1,18 @@
+valami:
+    FPGA_clk_period: 10
+    GetDataPeriodical: 1
+    HbridgeCharge_L: 3.0
+    HbridgeCharge_R: 3.0
+    IncSenVelocityAvgFilterSize_L: 100
+    IncSenVelocityAvgFilterSize_R: 100
+    IncrementalSensorDirection_L: 1
+    IncrementalSensorDirection_R: 0
+    IncrementalSensorResolution_L: 600
+    IncrementalSensorResolution_R: 600
+    LogLevel: 71
+    MaxGradePerSec: 100.0
+    NodeId: 100
+    PwmFreqventi_L: 5000.0
+    PwmFreqventi_R: 5000.0
+    TsTimerPeriod: 10
+    loop_hz: 100

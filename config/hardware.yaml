@@ -1,0 +1,5 @@
+hardware_interface:
+     joints:
+       - RIGHT_W
+       - LEFT_W
+
