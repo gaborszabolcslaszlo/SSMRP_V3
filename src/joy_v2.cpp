@@ -15,6 +15,7 @@
 
 using namespace std;
 
+
 int button_DeadMan_1_Value;
 int button_DeadMan_2_Value;
 
